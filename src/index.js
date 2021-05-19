@@ -11,7 +11,7 @@ appDiv.innerHTML = `<canvas id='canvas'>JS Starter</canvas>`;
 const height = 800;
 const width = 800;
 
-const canvas = $("#canvas");
+const canvas = $('#canvas');
 canvas[0].width = width;
 canvas[0].height = height;
 const ctx = canvas[0].getContext('2d');
@@ -21,144 +21,85 @@ const colors = 4;
 
 const data = myImageData.data;
 
-const f = function(data, i, x, y, rgba) {
-  data[(y * height + x) * colors + 0] = rgba.r(i, x, y) * 255;
-  data[(y * height + x) * colors + 1] = rgba.g(i, x, y) * 255;
-  data[(y * height + x) * colors + 2] = rgba.b(i, x, y) * 255;
-  data[(y * height + x) * colors + 3] = rgba.a(i, x, y) * 255;
-};
-
-const rgba = function(width, height) {
-  const r = (i, x, y) => {
-    return terrainColor[i * 4 + 0];
-  };
-
-  const g = (i, x, y) => {
-    return terrainColor[i * 4 + 1];
-  };
-
-  const b = (i, x, y) => {
-    //return d[i] / width;
-    return terrainColor[i * 4 + 2];
-  };
-
-  const a = (i, x, y) => {
-    return 1;
-  };
-
-  return {
-    r: r,
-    g: g,
-    b: b,
-    a: a
-  };
-};
-
 const d = new Float32Array(data.length / colors);
 const seen = new Int32Array(data.length / colors);
 const terrainColor = new Float32Array(data.length);
+console.log((data.length / 4) * 256);
+let gridColor1 = new Float32Array((data.length / colors) * 256);
+let gridColor2 = new Float32Array((data.length / colors) * 256);
 
-const sx = width / 2;
-const sy = height / 2;
-const s = sx + sy * height;
-const iq = [];
-for (let r = 0; r < 1; r++) {
-  const x = Math.floor(Math.random() * width);
-  const y = Math.floor(Math.random() * height);
-  const i = r == 0 ? s : x + y * height;
-  terrainColor[i * 4 + 0] = Math.random();
-  terrainColor[i * 4 + 1] = Math.random();
-  terrainColor[i * 4 + 2] = Math.random();
-  terrainColor[i * 4 + 3] = Math.random();
-  iq.push(i);
+const clamp = (x, a, b) => {
+  return Math.min(Math.max(x, a), b);
+};
+
+const put = (x, y, i, fx) => {
+  terrainColor[i * 4 + 0] = clamp(fx(x, y, i, 0) * 255, 0, 255);
+  terrainColor[i * 4 + 1] = clamp(fx(x, y, i, 1) * 255, 0, 255);
+  terrainColor[i * 4 + 2] = clamp(fx(x, y, i, 2) * 255, 0, 255);
+  terrainColor[i * 4 + 3] = clamp(fx(x, y, i, 3) * 255, 0, 255);
+};
+
+const fx = (x, y, i, rgb) => {
+  const xf = x / w;
+  const yf = y / h;
+  return Math.sin(2.0 * Math.PI * xf) + Math.sin(2.0 * Math.PI * yf);
+};
+
+const w = width;
+const h = height;
+const imax = 255;
+for (let x = 0; x < w; x++) {
+  for (let y = 0; y < h; y++) {
+    for (let i = 0; i < imax; i++) {
+      gridColor1[i] = i / imax;
+    }
+  }
 }
 
-const fcmp = (a, b) => {
-  return d[a] - d[b];
-};
-const q = new TinyQueue(iq, fcmp); //new Int32Array(data.length * 4 / colors);
+const nbs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 
-const cf = rgba(width, height);
+console.log('hello');
 
-const add = (q, ni) => {
-  d[ni] = d[i] + 0.1 * (Math.random() - 0.2);
-  const diff = d[ni] - d[i];
-  const fx = () => 1.0 * (Math.random() - 0.5) * diff;
-  terrainColor[ni * 4 + 0] = terrainColor[i * 4 + 0] + fx();
-  terrainColor[ni * 4 + 1] = terrainColor[i * 4 + 1] + fx();
-  terrainColor[ni * 4 + 2] = terrainColor[i * 4 + 2] + fx();
-  terrainColor[ni * 4 + 3] = terrainColor[i * 4 + 3] + fx();
-  q.push(ni);
-};
+for (let iter = 0; iter < 10; iter++) {
+  console.log('iter', iter);
+  for (let x = 0; x < w; x++) {
+    for (let y = 0; y < h; y++) {
+      const ix = (y * height + x) * imax;
+      const tx = y * height + x;
+      for (let i = 0; i < imax; i++) {
+        if (gridColor1[ix] >= 0.0) {
+          let prob = 0.0;
+          for (let nbi = 0; nbi < nbs.length; nbi++) {
+            const [dx, dy] = nbs[nbi];
+            const nx = x + dx;
+            const ny = y + dy;
+            const cur = gridColor1[ix];
+            if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+              const ix2 = (y * height + x) * imax;
+              prob += Math.abs(cur - gridColor1[ix2]);
+            }
 
-const neighbours = (q, i, x, y) => {
-  for (let dx = -1; dx <= 1; dx++) {
-    for (let dy = -1; dy <= 1; dy++) {
-      const nx = x + dx;
-      const ny = y + dy;
-      if (Math.abs(dx) + Math.abs(dy) != 1) {
-        continue;
-      }
-      if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-        const ni = nx + ny * height;
-        if (seen[ni] === 0) {
-          add(q, ni);
+            if (Math.random() > prob) {
+              // survives
+              gridColor2[ix] = gridColor1[ix];
+              put(x, y, tx, (x, y, i, rgb) => gridColor1[ix]);
+              terrainColor[tx] = gridColor1[ix];
+            } else {
+              gridColor2[ix] = -1.0;
+            }
+          }
         }
       }
     }
   }
-};
-
-let qi = 0;
-let qj = 1;
-while (q.length > 0) {
-  const i = q.pop();
-
-  if (seen[i] !== 0) {
-    continue;
-  }
-  seen[i] = 1;
-  
-  const x = i % height;
-  const y = Math.floor(i / height);
-  f(data, i, x, y, cf);
-
-  /*
-  const dd = 5;
-  for (let dx = -dd; dx <= dd; dx++) {
-    for (let dy = -dd; dy <= dd; dy++) {
-      const dxy = Math.sqrt(dx * dx + dy * dy);
-      if (dxy <= dd) {
-        const nx = x + dx;
-        const ny = y + dy;
-        const ni = nx + ny * height;
-        if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-          const diff = d[ni] - d[i];
-          const gx = () => 10.0 * (Math.random() - 0.5) * diff;
-          terrainColor[ni * 4 + 0] = terrainColor[i * 4 + 0] + gx();
-          terrainColor[ni * 4 + 1] = terrainColor[i * 4 + 1] + gx();
-          terrainColor[ni * 4 + 2] = terrainColor[i * 4 + 2] + gx();
-          terrainColor[ni * 4 + 3] = terrainColor[i * 4 + 3] + gx();
-          f(data, ni, nx, ny, cf);
-        }
-      }
-    }
-  }
-
-  for (let k = 0; k < 2; k++) {
-    const r = 10.0;
-    const theta = 2.0 * Math.PI * Math.random();
-    const rx = Math.floor(x + r * Math.cos(theta));
-    const ry = Math.floor(y + r * Math.sin(theta));
-    const ni = rx + ry * height;
-    if (seen[ni] === 0) {
-      add(q, ni);
-    }
-  }*/
-  
-  {
-    neighbours(q, i, x, y);
-  }
+  let gridColor3 = gridColor2;
+  gridColor2 = gridColor1;
+  gridColor1 = gridColor3;
 }
 
+for (let i = 0; i < terrainColor.length; i++) {
+  myImageData.data[i] = terrainColor[i];
+}
 ctx.putImageData(myImageData, 0, 0);
+//ctx.putImageData(myImageData, 0, 0);
+
