@@ -52,7 +52,8 @@ const randMult = function(state) {
   avgMatrix /= count;
   lib.forEachMatrix(out, (data, x, y) => {
     //out[x][y] /= maxMatrix;
-    out[x][y] /= avgMatrix;
+    //out[x][y] /= avgMatrix;
+    out[x][y] = 1 / (1 + Math.exp(-out[x][y]));
   });
 
 	const f = (x, y) => {

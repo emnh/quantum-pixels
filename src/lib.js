@@ -37,6 +37,17 @@ const setup = function() {
   };
 };
 
+const forEachNeighbour4 = function(data, x, y, f) {
+  for (let i = 0; i < neighbours4.length; i++) {
+    const [dx, dy] = neighbours4[i];
+    const nx = x + dx;
+    const ny = y + dy;
+    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+      f(nx, ny);
+    }
+  }
+};
+
 const forEachMatrix = function(data, f) {
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
@@ -100,5 +111,6 @@ module.exports = {
   randomize,
   initialize,
   misc,
-  forEachMatrix
+  forEachMatrix,
+  forEachNeighbour4
 };

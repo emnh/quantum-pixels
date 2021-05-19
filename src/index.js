@@ -6,5 +6,6 @@ const lib = require('./lib.js');
 
 const state = lib.setup();
 //lib.randomize(state);
-require('./matrix.js').randMult(state);
+//require('./matrix.js').randMult(state);
+require('./aqua.js').run(state);
 lib.showImage(state);
