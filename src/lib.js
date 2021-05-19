@@ -37,17 +37,23 @@ const setup = function() {
   };
 };
 
-const randomize = function(state) {
+const initialize = function(state, f) {
   const data = state.data;
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
       const i = (y * height + x) * colors;
-      for (let rgba = 0; rgba < colors; rgba++) {
-        data[i + rgba] = Math.random() * 255;
-      }
+      const [r, g, b] = f(x, y);
+      data[i + 0] = clamp(r, 0, 1) * 255;
+      data[i + 1] = clamp(g, 0, 1) * 255;
+      data[i + 2] = clamp(b, 0, 1) * 255;
       data[i + 3] = 255.0;
     }
   }
+};
+
+const randomize = function(state) {
+  const r = () => Math.random();
+  initialize(state, (x, y) => [r(), r(), r()]);
 };
 
 const misc = function() {
@@ -84,5 +90,6 @@ module.exports = {
   neighbours9,
   showImage,
   randomize,
+  initialize,
   misc
 };
