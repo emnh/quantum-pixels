@@ -33,7 +33,27 @@ const randMult = function(state) {
   }, settings).setOutput([lib.width, lib.height]);
 
 	const matrices = generateMatrices();
-  const out = multiplyMatrix(matrices[0], matrices[1]);
+  let a = matrices[0];
+  let b = matrices[1];
+  for (let i = 0; i < 10; i++) {
+    let c = multiplyMatrix(a, b);
+    a = c;
+  }
+  const out = a;
+  //const out = multiplyMatrix(matrices[0], matrices[1]);
+
+  let avgMatrix = 0.0;
+  let maxMatrix = 0.0;
+  let count = lib.width * lib.height;
+  lib.forEachMatrix(out, (data, x, y) => {
+    maxMatrix = Math.max(out[x][y], maxMatrix);
+    avgMatrix += out[x][y];
+  });
+  avgMatrix /= count;
+  lib.forEachMatrix(out, (data, x, y) => {
+    //out[x][y] /= maxMatrix;
+    out[x][y] /= avgMatrix;
+  });
 
 	const f = (x, y) => {
     const v = out[x][y];

@@ -1,7 +1,7 @@
 const $ = require('jquery');
 
-const height = 200;
-const width = 200;
+const height = 400;
+const width = 400;
 const colors = 4;
 
 const neighbours4 = [[-1, 0], [1, 0], [0, -1], [0, 1]];
@@ -35,6 +35,14 @@ const setup = function() {
     myImageData,
     data
   };
+};
+
+const forEachMatrix = function(data, f) {
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      f(data, x, y);
+    }
+  }
 };
 
 const initialize = function(state, f) {
@@ -91,5 +99,6 @@ module.exports = {
   showImage,
   randomize,
   initialize,
-  misc
+  misc,
+  forEachMatrix
 };
