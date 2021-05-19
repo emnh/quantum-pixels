@@ -1,0 +1,9 @@
+{
+  "name": "quantum-pixels",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "jquery": "3.4.1",
+    "tinyqueue": "^2.0.3"
+  }
+}
