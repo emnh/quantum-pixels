@@ -1,9 +1,6 @@
 const $ = require('jquery');
 const TinyQueue = require('tinyqueue');
 
-// Import stylesheets
-import './style.css';
-
 // Write Javascript code!
 const appDiv = document.getElementById('app');
 appDiv.innerHTML = `<canvas id='canvas'>JS Starter</canvas>`;
