@@ -37,13 +37,13 @@ const setup = function() {
   };
 };
 
-const forEachNeighbour4 = function(data, x, y, f) {
+const forEachNeighbour4 = function(x, y, f) {
   for (let i = 0; i < neighbours4.length; i++) {
     const [dx, dy] = neighbours4[i];
     const nx = x + dx;
     const ny = y + dy;
     if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-      f(nx, ny);
+      f(x, y, nx, ny);
     }
   }
 };
@@ -112,5 +112,6 @@ module.exports = {
   initialize,
   misc,
   forEachMatrix,
-  forEachNeighbour4
+  forEachNeighbour4,
+  colors
 };
