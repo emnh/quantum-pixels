@@ -1,7 +1,7 @@
 const $ = require('jquery');
 
-const height = 400;
-const width = 400;
+const height = 1000;
+const width = 1000;
 const colors = 4;
 
 const neighbours4 = [[-1, 0], [1, 0], [0, -1], [0, 1]];

@@ -4,10 +4,13 @@ const TinyQueue = require('tinyqueue').default;
 const run = function(state) {
   console.log('Aqua');
   const len = state.data.length / lib.colors;
-  const colors = new Float32Array(len * lib.colors);
+  const colorData = new Float32Array(len * lib.colors);
   const d = new Float32Array(len);
   for (let i = 0; i < len; i++) {
     d[i] = Math.random();
+    colorData[i * lib.colors + 0] = Math.random();
+    colorData[i * lib.colors + 1] = Math.random();
+    colorData[i * lib.colors + 2] = Math.random();
   }
   const cd = new Float32Array(len);
   for (let i = 0; i < len; i++) {
@@ -25,9 +28,13 @@ const run = function(state) {
       const ni = ny * lib.height + nx;
       cd[ni] = cd[i] + d[i];
       parents[ni] = i;
-      q.push([nx, ny]); 
+      q.push([nx, ny]);
     }
   };
+
+  const fac = 0.1;
+  const rnd = x => (Math.random() - 0.5) * 2.0;
+  const g = (p, r) => colorData[p * lib.colors + r] + fac * rnd();
 
   let qIndex = 0;
   while (q.length > 0) {
@@ -38,29 +45,23 @@ const run = function(state) {
     }
     seen[i] = 1;
 
-    if (qIndex == 0 || true) {
-      colors[i * colors + 0] = Math.random();
-      colors[i * colors + 1] = Math.random();
-      colors[i * colors + 2] = Math.random();
-    } else {
-      const p = parents[i];
-      const fac = 0.1;
-      const g = (r) => colors[p * colors + r] + fac * Math.random();
-      colors[i * colors + 0] = g(0);
-      colors[i * colors + 1] = g(1);
-      colors[i * colors + 2] = g(2);
+    const p = parents[i];
+    if (qIndex > 0) {
+      colorData[i * lib.colors + 0] = g(p, 0);
+      colorData[i * lib.colors + 1] = g(p, 1);
+      colorData[i * lib.colors + 2] = g(p, 2);
     }
 
     lib.forEachNeighbour4(x, y, f);
     qIndex++;
     if (qIndex % 10 == 0) {
-      console.log(qIndex);
+      //console.log(qIndex);
     }
   }
   const f2 = (x, y) => {
-    const r = colors[(y * lib.height + x) * lib.colors + 0];
-    const g = colors[(y * lib.height + x) * lib.colors + 1];
-    const b = colors[(y * lib.height + x) * lib.colors + 2];
+    const r = colorData[(y * lib.height + x) * lib.colors + 0];
+    const g = colorData[(y * lib.height + x) * lib.colors + 1];
+    const b = colorData[(y * lib.height + x) * lib.colors + 2];
     return [r, g, b];
   };
   lib.initialize(state, f2);
