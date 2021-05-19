@@ -1,5 +1,6 @@
 const $ = require('jquery');
 const TinyQueue = require('tinyqueue');
+const gpu = require('gpu.js');
 
 // Write Javascript code!
 const appDiv = document.getElementById('app');
