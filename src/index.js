@@ -4,6 +4,7 @@ const gpu = require('gpu.js');
 
 const lib = require('./lib.js');
 
-const data = lib.setup();
-lib.randomize(data);
-lib.showImage(data);
+const state = lib.setup();
+//lib.randomize(state);
+require('./matrix.js').randMult(state);
+lib.showImage(state);
