@@ -8,16 +8,28 @@ const run = function(state) {
   const d = new Float32Array(len);
   for (let i = 0; i < len; i++) {
     d[i] = Math.random();
-    colorData[i * lib.colors + 0] = Math.random();
-    colorData[i * lib.colors + 1] = Math.random();
-    colorData[i * lib.colors + 2] = Math.random();
+    colorData[i * lib.colors + 0] = 1.0;
+    colorData[i * lib.colors + 1] = 1.0;
+    colorData[i * lib.colors + 2] = 1.0;
   }
   const cd = new Float32Array(len);
   for (let i = 0; i < len; i++) {
     cd[i] = 0.0;
   }
   const fcmp = (a, b) => cd[a[1] * lib.height + a[0]] - cd[b[1] * lib.height + b[0]];
-  const iq = [[lib.width * 0.5, lib.height * 0.5]];
+  //const iq = [[lib.width * 0.5, lib.height * 0.5]];
+  const iq = [];
+  const smax = 20;
+  for (let s = 0; s < smax; s++) {
+    const rnd = () => Math.random();
+    const x = Math.floor(lib.width * rnd());
+    const y = Math.floor(lib.height * rnd());
+    const i = y * lib.height + x;
+    iq.push([x, y]);
+    colorData[i * lib.colors + 0] = Math.random();
+    colorData[i * lib.colors + 1] = Math.random();
+    colorData[i * lib.colors + 2] = Math.random();
+  }
   const q = new TinyQueue(iq, fcmp);
   const seen = new Int32Array(len);
   const parents = new Int32Array(len);
@@ -32,7 +44,7 @@ const run = function(state) {
     }
   };
 
-  const fac = 0.1;
+  const fac = 0.01;
   const rnd = x => (Math.random() - 0.5) * 2.0;
   const g = (p, r) => colorData[p * lib.colors + r] + fac * rnd();
 
@@ -46,7 +58,7 @@ const run = function(state) {
     seen[i] = 1;
 
     const p = parents[i];
-    if (qIndex > 0) {
+    if (colorData[i * lib.colors + 0] === 1.0) {
       colorData[i * lib.colors + 0] = g(p, 0);
       colorData[i * lib.colors + 1] = g(p, 1);
       colorData[i * lib.colors + 2] = g(p, 2);
